@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.core.fromnumeric import reshape, transpose
-from dezero.core import Function
-from dezero.core import as_variable
+from dezero.core import Function, Variable
+from dezero.core import as_variable, as_array
 from dezero import utils,cuda
 
 class Sin(Function):
@@ -308,6 +308,27 @@ class SoftmaxCrossEntropy(Function):
         y = (y - t_onehot) * gy
         return y
 
-
 def softmax_cross_entropy(x, t):
     return SoftmaxCrossEntropy()(x, t)
+
+def accuracy(y, t):
+    y, t = as_variable(y), as_variable(t)
+
+    pred = y.data.argmax(axis=1).reshape(t.shape)
+    result = (pred == t.data)
+    acc = result.mean()
+    return Variable(as_array(acc))
+
+class ReLU(Function):
+    def forward(self, x):
+        y = np.maximum(x, 0.0)
+        return y
+
+    def backward(self, gy):
+        x, = self.inputs
+        mask = x.data > 0
+        gx = gy * mask
+        return gx
+
+def relu(x):
+    return ReLU()(x)

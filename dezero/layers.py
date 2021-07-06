@@ -29,10 +29,10 @@ class Layer:
         for name in self._params:
             obj = self.__dict__[name]
 
-        if isinstance(obj, Layer):
-            yield from obj.params()
-        else:
-            yield obj
+            if isinstance(obj, Layer):
+                yield from obj.params()
+            else:
+                yield obj
 
     def cleargrads(self):
         for param in self.params():
